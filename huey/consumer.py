@@ -155,6 +155,7 @@ class WorkerThread(ConsumerThread):
             self._logger.info('Executing %s' % task)
             self.huey.emit_task('started', task)
             self.huey.execute(task)
+            self.huey.remove_from_processing_list(task)
             self.huey.emit_task('finished', task)
         except DataStorePutException:
             self._logger.warn('Error storing result', exc_info=1)
