@@ -4,6 +4,7 @@ import time
 import redis
 from redis.exceptions import ConnectionError
 
+from huey.constants import PROCESSING_LIST_QUERY
 from huey.backends.base import BaseDataStore
 from huey.backends.base import BaseEventEmitter
 from huey.backends.base import BaseQueue
@@ -58,11 +59,14 @@ class RedisBlockingQueue(RedisQueue):
 
     def read(self):
         try:
-            return self.conn.brpop(self.queue_name)[1]
+            return self.conn.brpoplpush(self.queue_name, PROCESSING_LIST_QUERY, 0)
         except ConnectionError:
             # unfortunately, there is no way to differentiate a socket timing
             # out and a host being unreachable
             return None
+
+    def remove(self, data):
+        return self.conn.lrem(PROCESSING_LIST_QUERY, data)
 
 
 class RedisSchedule(BaseSchedule):

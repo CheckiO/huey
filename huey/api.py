@@ -243,6 +243,10 @@ class Huey(object):
 
         return result
 
+    def remove_from_processing_list(self, task):
+        message = registry.get_message_for_task(task)
+        self._remove(message)
+
     def revoke(self, task, revoke_until=None, revoke_once=False):
         if not self.result_store:
             raise QueueException('A DataStore is required to revoke task')
